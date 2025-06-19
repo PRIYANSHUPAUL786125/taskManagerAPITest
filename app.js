@@ -1,0 +1,10 @@
+const express=require('express');
+const app=express();
+const env=require('dotenv').config();
+const authRoute=require('./routes/auth');
+const connectDB=require('./config/db');
+connectDB();
+app.use(express.json());
+app.use('/api',authRoute);
+const PORT = process.env.PORT || 3000;
+app.listen(PORT);
