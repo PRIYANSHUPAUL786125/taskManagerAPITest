@@ -1,19 +1,23 @@
-const jwt=require('jsonwebtoken');
-const authUser=(req,res,next)=>{
-    try{const token = req.cookies.token;
-    if(!token){
-        return res.status(400).json({message:"please login"});
-    }
-    const secret=process.env.SECRET_KEY;
-    const decoded=jwt.verify(token,secret);
-    req.user = decoded;
-    console.log('verified user');
-    next();
-}
-catch(error){
-    console.log(error);
-    return res.status(403).json({message:"please login again"});
+const jwt = require('jsonwebtoken');
 
+const authUser = (req, res, next) => {
+  try {
+    const token = req.cookies?.token; // optional chaining avoids crash if cookies is undefined
+
+    if (!token) {
+      return res.status(401).json({ message: "Unauthorized: Please log in" });
     }
-}
-module.exports=authUser;
+
+    const decoded = jwt.verify(token, process.env.SECRET_KEY);
+
+    req.user = decoded; // should contain at least user id from payload
+    console.log('✅ Verified user:', req.user);
+
+    next();
+  } catch (error) {
+    console.error('JWT Verification Error:', error.message);
+    return res.status(403).json({ message: "Forbidden: Please log in again" });
+  }
+};
+
+module.exports = authUser;

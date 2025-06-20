@@ -60,9 +60,9 @@ Edit
 }
 Task routes:
 
-POST /tasks – create
+POST /tasks – create//done
 
-GET /tasks – all tasks (for user)
+GET /tasks – all tasks (for user)/done
 
 GET /tasks/:id – single task
 
