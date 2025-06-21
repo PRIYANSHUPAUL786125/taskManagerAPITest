@@ -1,12 +1,13 @@
 const bcrypt=require('bcryptjs');
 const jwt=require('jsonwebtoken');
 const User=require('../models/auth');
-
+const {validationResult}=require('express-validator')
 const registerPost=async (req,res)=>{
     try{
         const {name,email,password}=req.body;
         console.log(password,name,email);
-        const existingUser = await User.findOne({ email });
+        const errorVal=validationResult(req);
+        if(errorVal.isEmpty()){const existingUser = await User.findOne({ email });
         if (existingUser) {
           return res.status(409).json({ message: 'User already exists' });
         }
@@ -25,7 +26,13 @@ const registerPost=async (req,res)=>{
       message: 'User registered successfully',
       User: { name: newUser.name, email: newUser.email },
       token, // optionally send token in response too
-    });
+    });}
+    else{
+        res.status(400).json({
+        message: 'Validation failed',
+      errors: errorVal.array()
+});
+    }
     }
     catch(error){
         res.status(500).json({error:'sorry this is currently not working'});
@@ -34,7 +41,14 @@ const registerPost=async (req,res)=>{
 }
 const loginPost=async (req,res)=>{
 try{const {email,password}=req.body;
-const reqdUser=await User.findOne({email});
+const errorVal=validationResult(req);
+if(!errorVal.isEmpty()){
+    res.status(400).json({
+        message:'Validation failed',
+        err:errorVal.array()
+    })
+}
+else{const reqdUser=await User.findOne({email});
 if(!reqdUser){
     return res.status(400).json({error:'invalid email or password'})
 }
@@ -57,7 +71,7 @@ const payLoad={id: reqdUser._id,email:reqdUser.email};
         token
     })
     }
-    catch(error){
+}    catch(error){
         res.status(500).json({Error:'sorry it is a server side error'})
         console.log(error);
     }

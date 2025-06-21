@@ -1,8 +1,17 @@
 const User=require('../models/auth');
 const Task=require('../models/task');
+const {validationResult}=require('express-validator')
 const createTask=async (req,res)=>{
     //console.log(req.user)
-    try{const newTask=await Task.create({
+    const valError=validationResult(req)
+    if(!valError.isEmpty()){
+        return res.status(400).json({
+            message: 'Validation failed',
+            error:valError.array()
+        })
+    }
+    try{
+        const newTask=await Task.create({
         ...req.body,
         user:req.user.id
     });
